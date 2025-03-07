@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cold DM Outreach Calculator</title>
+  <style>
+    :root {
+      --primary-color: #2563eb;
+      --secondary-color: #1e40af;
+      --background-color: #f8fafc;
+      --card-background: #ffffff;
+      --text-color: #1e293b;
+      --border-color: #e2e8f0;
+      --success-color: #22c55e;
+      --warning-color: #ef4444;
+      --shadow-color: rgba(0, 0, 0, 0.05);
+      --hover-color: #f1f5f9;
+    }
+
+    [data-theme="dark"] {
+      --primary-color: #3b82f6;
+      --secondary-color: #60a5fa;
+      --background-color: #0f172a;
+      --card-background: #1e293b;
+      --text-color: #f1f5f9;
+      --border-color: #334155;
+      --shadow-color: rgba(0, 0, 0, 0.2);
+      --hover-color: #1e293b;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      line-height: 1.6;
+      color: var(--text-color);
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 2rem;
+      background-color: var(--background-color);
+      transition: background-color 0.3s, color 0.3s;
+    }
+    
+    h1, h2, h3 {
+      color: var(--text-color);
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+    
+    .card {
+      background-color: var(--card-background);
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 6px var(--shadow-color);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--border-color);
+    }
+    
+    .input-group {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+    
+    .input-group label {
+      width: 240px;
+      font-weight: 500;
+      cursor: help;
+      color: var(--text-color);
+    }
+    
+    .tooltip {
+      position: absolute;
+      background: var(--secondary-color);
+      color: white;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+      z-index: 1000;
+      display: none;
+      max-width: 250px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .input-group:hover .tooltip {
+      display: block;
+    }
+    
+    input {
+      width: 120px;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 0.375rem;
+      background-color: var(--card-background);
+      color: var(--text-color);
+      font-size: 0.875rem;
+      transition: all 0.2s;
+    }
+    
+    input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    
+    input[type="number"] {
+      -moz-appearance: textfield;
+    }
+    
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-bottom: 1.5rem;
+      background-color: var(--card-background);
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
+    
+    th, td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    th {
+      background-color: var(--hover-color);
+      font-weight: 600;
+      color: var(--text-color);
+    }
+    
+    tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .highlight {
+      background-color: rgba(37, 99, 235, 0.1);
+      font-weight: 600;
+    }
+    
+    .warning {
+      color: var(--warning-color);
+    }
+    
+    .success {
+      color: var(--success-color);
+    }
+    
+    .controls {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    
+    .button {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 0.375rem;
+      cursor: pointer;
+      background-color: var(--primary-color);
+      color: white;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    
+    .button:hover {
+      background-color: var(--secondary-color);
+    }
+    
+    .button.secondary {
+      background-color: var(--hover-color);
+      color: var(--text-color);
+    }
+    
+    @media (max-width: 640px) {
+      body {
+        padding: 1rem;
+      }
+
+      .input-group {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .input-group label {
+        margin-bottom: 0.5rem;
+        width: 100%;
+      }
+      
+      input {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <button class="button" onclick="toggleTheme()">Toggle Dark Mode</button>
+    <button class="button secondary" onclick="resetValues()">Reset Values</button>
+  </div>
+
+  <h1>Cold DM Outreach Calculator</h1>
+  
+  <div class="card">
+    <h2>Input Parameters</h2>
+    <div class="input-group">
+      <label for="dmsPerHour">DMs per hour:
+        <span class="tooltip">Number of direct messages you can send per hour</span>
+      </label>
+      <input type="number" id="dmsPerHour" value="25" min="1" max="100" required>
+    </div>
+    
+    <div class="input-group">
+      <label for="bookingRate">Booking rate (%):
+        <span class="tooltip">Percentage of DMs that result in booked meetings</span>
+      </label>
+      <input type="number" id="bookingRate" value="2" min="0.1" max="100" step="0.1" required>
+    </div>
+    
+    <div class="input-group">
+      <label for="closeRate">Meeting-to-close rate (%):
+        <span class="tooltip">Percentage of meetings that result in closed deals</span>
+      </label>
+      <input type="number" id="closeRate" value="20" min="0.1" max="100" step="0.1" required>
+    </div>
+    
+    <div class="input-group">
+      <label for="workingDays">Working days per month:
+        <span class="tooltip">Number of working days in a month (0 for no work)</span>
+      </label>
+      <input type="number" id="workingDays" value="22" min="0" max="31" required>
+    </div>
+    
+    <div class="input-group">
+      <label for="targetMeetings">Target daily meetings:
+        <span class="tooltip">Number of meetings you want to book per day</span>
+      </label>
+      <input type="number" id="targetMeetings" value="8" min="1" max="100" required>
+    </div>
+  </div>
+  
+  <div class="card">
+    <h2>Daily Requirements</h2>
+    <table>
+      <tr>
+        <th>Metric</th>
+        <th>Value</th>
+      </tr>
+      <tr>
+        <td>Total DMs needed daily</td>
+        <td id="totalDmsNeeded" class="highlight">400</td>
+      </tr>
+      <tr>
+        <td>Total hours needed daily</td>
+        <td id="totalHoursNeeded" class="highlight">16</td>
+      </tr>
+      <tr>
+        <td>Follow-up hours needed daily</td>
+        <td id="followUpHours" class="highlight">16</td>
+      </tr>
+      <tr>
+        <td>Total hours needed daily (including follow-ups)</td>
+        <td id="totalHoursWithFollowUp" class="highlight">32</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Team Size Calculator</h2>
+    <div class="input-group">
+      <label for="hoursPerTeamMember">Hours worked per team member:
+        <span class="tooltip">Number of hours each team member works per day</span>
+      </label>
+      <input type="number" id="hoursPerTeamMember" value="2" min="1" max="8" step="0.5" required>
+    </div>
+    <table>
+      <tr>
+        <th>Metric</th>
+        <th>Value</th>
+      </tr>
+      <tr>
+        <td>Team members needed</td>
+        <td id="teamSize" class="highlight">16</td>
+      </tr>
+      <tr>
+        <td>Total team hours</td>
+        <td id="teamHours">32</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Individual Performance</h2>
+    <div class="input-group">
+      <label for="individualHours">Hours worked per day:
+        <span class="tooltip">Number of hours you plan to work per day</span>
+      </label>
+      <input type="number" id="individualHours" value="2" min="1" max="8" step="0.5" required>
+    </div>
+    <table>
+      <tr>
+        <th>Metric</th>
+        <th>Daily</th>
+        <th>Monthly</th>
+      </tr>
+      <tr>
+        <td>DMs sent</td>
+        <td id="dmsSent">50</td>
+        <td id="monthlyDmsSent">1,100</td>
+      </tr>
+      <tr>
+        <td>Meetings booked</td>
+        <td id="meetingsBooked">1</td>
+        <td id="monthlyMeetingsBooked">22</td>
+      </tr>
+      <tr>
+        <td>Deals closed</td>
+        <td id="dealsClosed">0.2</td>
+        <td id="monthlyDealsClosed">4.4</td>
+      </tr>
+      <tr>
+        <td>Time spent on DMs</td>
+        <td id="dmTime" class="highlight">2.0 hours</td>
+        <td id="monthlyDmTime">44.0 hours</td>
+      </tr>
+      <tr>
+        <td>Time spent on follow-ups</td>
+        <td id="followUpTime" class="highlight">2.0 hours</td>
+        <td id="monthlyFollowUpTime">44.0 hours</td>
+      </tr>
+      <tr>
+        <td>Total time per day</td>
+        <td id="totalTime" class="highlight">4.0 hours</td>
+        <td id="monthlyTotalTime">88.0 hours</td>
+      </tr>
+    </table>
+  </div>
+  
+  <div class="card">
+    <h2>Monthly Business Model</h2>
+    <table>
+      <tr>
+        <th>Metric</th>
+        <th>Value</th>
+      </tr>
+      <tr>
+        <td>Total monthly DMs</td>
+        <td id="totalMonthlyDms">8,800</td>
+      </tr>
+      <tr>
+        <td>Total monthly meetings</td>
+        <td id="totalMonthlyMeetings">176</td>
+      </tr>
+      <tr>
+        <td>Total monthly deals</td>
+        <td id="totalMonthlyDeals">35.2</td>
+      </tr>
+    </table>
+  </div>
+  
+  <script>
+    // Theme handling
+    function toggleTheme() {
+      const body = document.body;
+      const currentTheme = body.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      body.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+    }
+
+    // Initialize theme
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.body.setAttribute('data-theme', savedTheme);
+
+    // Save values to localStorage
+    function saveValues() {
+      const inputs = document.querySelectorAll('input');
+      inputs.forEach(input => {
+        localStorage.setItem(input.id, input.value);
+      });
+    }
+
+    // Load values from localStorage
+    function loadValues() {
+      const inputs = document.querySelectorAll('input');
+      inputs.forEach(input => {
+        const savedValue = localStorage.getItem(input.id);
+        if (savedValue !== null) {
+          input.value = savedValue;
+        }
+      });
+    }
+
+    // Reset values to defaults
+    function resetValues() {
+      const defaults = {
+        dmsPerHour: 25,
+        bookingRate: 2,
+        closeRate: 20,
+        workingDays: 22,
+        targetMeetings: 8,
+        hoursPerTeamMember: 2,
+        individualHours: 2
+      };
+
+      Object.entries(defaults).forEach(([id, value]) => {
+        const input = document.getElementById(id);
+        if (input) {
+          input.value = value;
+          localStorage.setItem(id, value);
+        }
+      });
+
+      updateCalculations();
+    }
+
+    // Input validation
+    function validateInput(input, min, max) {
+      const value = parseFloat(input.value);
+      if (isNaN(value)) {
+        input.value = min;
+        return min;
+      }
+      if (value < min) {
+        input.value = min;
+        return min;
+      }
+      if (value > max) {
+        input.value = max;
+        return max;
+      }
+      return value;
+    }
+
+    // Get all input elements
+    const dmsPerHour = document.getElementById('dmsPerHour');
+    const bookingRate = document.getElementById('bookingRate');
+    const closeRate = document.getElementById('closeRate');
+    const workingDays = document.getElementById('workingDays');
+    const targetMeetings = document.getElementById('targetMeetings');
+    const hoursPerTeamMember = document.getElementById('hoursPerTeamMember');
+    const individualHours = document.getElementById('individualHours');
+    
+    // Update all calculations when inputs change
+    function updateCalculations() {
+      // Validate inputs
+      const dmsPerHourValue = validateInput(dmsPerHour, 1, 100);
+      const bookingRateValue = validateInput(bookingRate, 0.1, 100) / 100;
+      const closeRateValue = validateInput(closeRate, 0.1, 100) / 100;
+      const workingDaysValue = validateInput(workingDays, 0, 31);
+      const targetMeetingsValue = validateInput(targetMeetings, 1, 100);
+      const hoursPerTeamMemberValue = validateInput(hoursPerTeamMember, 1, 8);
+      const individualHoursValue = validateInput(individualHours, 1, 8);
+
+      // Save values after validation
+      saveValues();
+
+      // If working days is 0, set all monthly values to 0
+      if (workingDaysValue === 0) {
+        document.getElementById('totalMonthlyDms').textContent = '0';
+        document.getElementById('totalMonthlyMeetings').textContent = '0';
+        document.getElementById('totalMonthlyDeals').textContent = '0.0';
+        return;
+      }
+
+      // Update daily requirements
+      const totalDmsNeeded = targetMeetingsValue / bookingRateValue;
+      const totalHoursNeeded = totalDmsNeeded / dmsPerHourValue;
+      
+      document.getElementById('totalDmsNeeded').textContent = Math.round(totalDmsNeeded);
+      document.getElementById('totalHoursNeeded').textContent = totalHoursNeeded.toFixed(1);
+      
+      // Calculate total time including follow-ups (equal to DM time)
+      document.getElementById('followUpHours').textContent = totalHoursNeeded.toFixed(1);
+      document.getElementById('totalHoursWithFollowUp').textContent = (totalHoursNeeded * 2).toFixed(1);
+
+      // Update team size calculations
+      const totalHoursWithFollowUp = totalHoursNeeded * 2;
+      const teamSize = Math.ceil(totalHoursWithFollowUp / hoursPerTeamMemberValue);
+      const teamHours = teamSize * hoursPerTeamMemberValue;
+      
+      document.getElementById('teamSize').textContent = teamSize;
+      document.getElementById('teamHours').textContent = teamHours;
+
+      // Update individual performance
+      const dmsSent = dmsPerHourValue * individualHoursValue;
+      const meetingsBooked = dmsSent * bookingRateValue;
+      const dealsClosed = meetingsBooked * closeRateValue;
+      const dmTime = individualHoursValue;
+      const followUpTime = individualHoursValue; // Equal to DM time
+      const totalTime = dmTime + followUpTime;
+      
+      document.getElementById('dmsSent').textContent = Math.round(dmsSent);
+      document.getElementById('monthlyDmsSent').textContent = Math.round(dmsSent * workingDaysValue).toLocaleString();
+      document.getElementById('meetingsBooked').textContent = meetingsBooked.toFixed(1);
+      document.getElementById('monthlyMeetingsBooked').textContent = (meetingsBooked * workingDaysValue).toFixed(1);
+      document.getElementById('dealsClosed').textContent = dealsClosed.toFixed(1);
+      document.getElementById('monthlyDealsClosed').textContent = (dealsClosed * workingDaysValue).toFixed(1);
+      document.getElementById('dmTime').textContent = dmTime.toFixed(1) + ' hours';
+      document.getElementById('monthlyDmTime').textContent = (dmTime * workingDaysValue).toFixed(1) + ' hours';
+      document.getElementById('followUpTime').textContent = followUpTime.toFixed(1) + ' hours';
+      document.getElementById('monthlyFollowUpTime').textContent = (followUpTime * workingDaysValue).toFixed(1) + ' hours';
+      document.getElementById('totalTime').textContent = totalTime.toFixed(1) + ' hours';
+      document.getElementById('monthlyTotalTime').textContent = (totalTime * workingDaysValue).toFixed(1) + ' hours';
+      
+      // Monthly business model
+      const totalMonthlyDms = totalDmsNeeded * workingDaysValue;
+      const totalMonthlyMeetings = targetMeetingsValue * workingDaysValue;
+      const totalMonthlyDeals = totalMonthlyMeetings * closeRateValue;
+      
+      document.getElementById('totalMonthlyDms').textContent = Math.round(totalMonthlyDms).toLocaleString();
+      document.getElementById('totalMonthlyMeetings').textContent = Math.round(totalMonthlyMeetings).toLocaleString();
+      document.getElementById('totalMonthlyDeals').textContent = totalMonthlyDeals.toFixed(1);
+    }
+    
+    // Add event listeners to all inputs
+    const allInputs = document.querySelectorAll('input');
+    allInputs.forEach(input => {
+      input.addEventListener('input', updateCalculations);
+      input.addEventListener('blur', () => {
+        updateCalculations();
+        saveValues();
+      });
+    });
+    
+    // Initialize calculations and load saved values
+    loadValues();
+    updateCalculations();
+  </script>
+</body>
+</html>
